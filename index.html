@@ -47,7 +47,7 @@ void main() {
 <!!-------- CREATE A PROPERLY DESCRIPTIVE TITLE BELOW -------->
 
 <script id='my_title' type='text/html'>
-Assignment 10 - Bezier teapot
+Final Project: Pixar Intro Recreation
 </script>
 
 
@@ -55,15 +55,7 @@ Assignment 10 - Bezier teapot
 <script id='my_instructions' type='text/html'><font color=#b0b0b0>
 <p style="font-size: 18px">
   Description<br><br>
-  This teapot is created by using Newell's provided guidepoints to create an array
-  of parametric Bezier patches. To make this possible, I created a custom
-  <i>createParametricPatch</i> method that in turn calls a <i>patchVertex</i> method
-  in the same way parametric spheres, cubes, and cylinders are created.
-  Something new about these two functions is that they take an array of
-  guidepoints as an argument aside from u and v, so that they are completely customizable for any
-  sort of patch a designer might want to create.
-  My mTeapot function calls <i>createParametricPatch</i> a total of 32 times, one for
-  each patch of the teapot.
+  TODO : Add Description of each member's contributions
 </script>
 
 
@@ -294,7 +286,7 @@ function createParametricPatch(
 }
 
 var sphereTriangleStrip = createParametricShape(sVertex, 30, 30);
-var cylinderTriangleStrip = createParametricShape(cylinderVertex, 8, 5);
+var cylinderTriangleStrip = createParametricShape(cylinderVertex, 50, 5);
 var cubeTriangleStrip = createParametricShape(cubeVertex, 8, 5);
 
 // Multiply 4 by 4 matrices a and b (courtesy of https://evanw.github.io/lightgl.js/docs/matrix.html#section-5)
@@ -437,6 +429,17 @@ function mSphere(r, g, b){
   setUniform('3fv', 'uRGB', [r,g,b]);
   drawBuffer(gl);
 };
+
+// DRAWS CYLINDER
+
+function mCylinder(r, g, b){
+  setBuffer(gl, cylinderTriangleStrip);
+  setUniform('Matrix4fv', 'uObjectMat', false, m.matrixValues[m.stackPointer]);
+  let norMat = matrixInvert(m.matrixValues[m.stackPointer]);
+  setUniform('Matrix4fv', 'uNormalMat', false, norMat);
+  setUniform('3fv', 'uRGB', [r,g,b]);
+  drawBuffer(gl);
+}
 
 function mTeapot(r, g, b){
   let teapot_data = [[ // 0
@@ -614,6 +617,53 @@ function mTeapot(r, g, b){
 
 }
 
+function drawLamp(){
+
+  m.save();
+   m.scale(.5, .1, .5);
+   m.translate(0, -.5, 0);
+   mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+   m.scale(.075, .075, .075);
+   m.translate(0, -.5+2*0.075, 0);
+   mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(0.05, 0.05, 0.05);
+    m.rotateX(PI/2);
+    m.translate(0, (2*0.075)+2*0.05-.5, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+   m.scale(.075, .075, .075);
+   m.translate(0, (2*0.075)+4*0.05-.5, 0);
+   mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(0.05, 0.05, 0.1);
+    m.rotateX(PI/2);
+    m.rotateZ(PI/4);
+    m.translate(2*-.05, -.05, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(0.05, 0.05, 0.1);
+    m.rotateX(PI/2);
+    m.rotateZ(-PI/4);
+    m.translate(2*0.05, -.05, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+   m.scale(.065, .065, .065);
+   m.translate(-0.15, 0, 0);
+   mSphere(.1, .3, .5);
+   m.translate(0.3, 0, 0);
+   mSphere(.1, .3, .5);
+  m.restore();
+
+}
+
 function drawFlower(y) {
   m.save();
     m.scale(.5, .1, .1);
@@ -631,6 +681,7 @@ function drawFlower(y) {
       m.restore();
     }
   m.restore();
+
 }
 
 
@@ -737,6 +788,7 @@ function animate(gl) {
     0, 0, 0, 1,
   ]);
 
+  drawLamp();
 }
 
 gl_start(canvas1, vs, fs);
