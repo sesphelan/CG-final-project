@@ -96,6 +96,8 @@ textArea.onkeyup = function() { canvas1.setShaders(vs, this.value); }
 
 var startTime = Date.now();
 
+let time = (Date.now() - startTime) / 1000;
+
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
@@ -617,49 +619,123 @@ function mTeapot(r, g, b){
 
 }
 
-function drawLamp(){
+let phase = 0;
+
+function drawLamp(elapsed){
+
+  const speed = .5;
+  phase += PI * speed * elapsed;
+  const rate = .1*Math.sin(phase);
 
   m.save();
    m.scale(.5, .1, .5);
-   m.translate(0, -.5, 0);
+   m.translate(0, -.5 + rate, 0);
    mSphere(.1, .3, .5);
   m.restore();
   m.save();
    m.scale(.075, .075, .075);
-   m.translate(0, -.5+2*0.075, 0);
+   m.translate(0, -.5+2*0.075 + rate, 0);
    mSphere(.1, .3, .5);
   m.restore();
   m.save();
     m.scale(0.05, 0.05, 0.05);
     m.rotateX(PI/2);
-    m.translate(0, (2*0.075)+2*0.05-.5, 0);
+    m.translate(0, rate + (2*0.075)+2*0.05-.5, 0);
     mCylinder(.1, .3, .5);
   m.restore();
   m.save();
    m.scale(.075, .075, .075);
-   m.translate(0, (2*0.075)+4*0.05-.5, 0);
+   m.translate(0, rate+ (2*0.075)+4*0.05-.5, 0);
    mSphere(.1, .3, .5);
   m.restore();
   m.save();
     m.scale(0.05, 0.05, 0.1);
     m.rotateX(PI/2);
     m.rotateZ(PI/4);
-    m.translate(2*-.05, -.05, 0);
+    m.translate(2*-.05, -.05 + rate, 0);
+    mCylinder(.1, .3, .5);
+    m.translate(0.2, 0.1, 0);
     mCylinder(.1, .3, .5);
   m.restore();
   m.save();
     m.scale(0.05, 0.05, 0.1);
     m.rotateX(PI/2);
     m.rotateZ(-PI/4);
-    m.translate(2*0.05, -.05, 0);
+    m.translate(2*0.05, -.05 + rate, 0);
+    mCylinder(.1, .3, .5);
+    m.translate(-3*0.05, 3*0.05, 0);
     mCylinder(.1, .3, .5);
   m.restore();
   m.save();
    m.scale(.065, .065, .065);
-   m.translate(-0.15, 0, 0);
+   m.translate(-0.15, rate, 0);
    mSphere(.1, .3, .5);
    m.translate(0.3, 0, 0);
    mSphere(.1, .3, .5);
+   m.translate(-0.15, 0.15, 0);
+   mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(0.04, 0.1, 0.1);
+     m.rotateX(PI/2);
+    m.rotateZ(PI/4);
+    m.translate(-2*.12, rate+0.09, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(.05, .05, .05);
+    m.translate(-2*.12 - .1, rate + 0.2, 0);
+    mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+     m.scale(0.04, 0.1, 0.2);
+     m.rotateX(PI/2);
+    m.rotateZ(-PI/4 + .2);
+    m.translate(-2*.12 + 0.01, rate + 0.37, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(.05, .05, .05);
+    m.translate(-.11, rate + 0.55, 0);
+    mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+     m.scale(0.04, 0.1, 0.2);
+     m.rotateX(PI/2);
+    m.rotateZ(-PI/4 + .2);
+    m.translate(0.1, rate + 0.32, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(.05, .05, .05);
+    m.translate(.21, rate + 0.5, 0);
+    mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(0.04, 0.1, 0.12);
+     m.rotateX(PI/2);
+    m.rotateZ(-PI/4 + .2);
+    m.translate(-0.035, rate + 0.68, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(0.04, 0.1, 0.15);
+    m.rotateX(PI/2);
+    m.rotateZ(PI/7);
+    m.translate(0.17, rate + 0.6, 0);
+    mCylinder(.1, .3, .5);
+  m.restore();
+  m.save();
+    m.scale(.065, .065, .065 );
+    m.translate(0.07, rate + 0.8, 0);
+    mSphere(.1, .3, .5);
+  m.restore();
+  m.save();
+  m.scale(0.04, 0.1, 0.07);
+     m.rotateX(PI/2);
+    m.rotateZ(-PI/3 + .3 + .2*Math.cos(phase));
+    m.translate(.13, rate + 0.87, -0.05);
+    mCylinder(.1, .3, .5);
   m.restore();
 
 }
@@ -788,7 +864,7 @@ function animate(gl) {
     0, 0, 0, 1,
   ]);
 
-  drawLamp();
+  drawLamp(.1);
 }
 
 gl_start(canvas1, vs, fs);
