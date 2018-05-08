@@ -146,6 +146,8 @@ function gl_start(canvas, vertexShader, fragmentShader) {           // START WEB
 
       setInterval(function() {                                      // Start the animation loop.
          gl = canvas.gl;
+         gl.clearColor(0.54, 0.81, 0.94, 1.0);
+         gl.clear(gl.COLOR_BUFFER_BIT);
          if (gl.startTime === undefined)                               // First time through,
             gl.startTime = Date.now();                                 //    record the start time.
          animate(gl);
