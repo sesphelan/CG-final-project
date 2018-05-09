@@ -423,7 +423,19 @@ var m = {
     this.matrixValues[this.stackPointer] = mat2;
   },
 };
+   
+// DRAWS CUBE
 
+function mCube ( r, g, b){
+  setBuffer(gl, cubeTriangleStrip);
+  setUniform('Matrix4fv', 'uObjectMat', false, m.matrixValues[m.stackPointer]);
+  let norMat = matrixInvert(m.matrixValues[m.stackPointer]);
+  setUniform('Matrix4fv', 'uNormalMat', false, norMat);
+  setUniform('3fv', 'uRGB', [r,g,b]);
+  drawBuffer(gl);
+};
+   
+// DRAWS SPHERE
 function mSphere(r, g, b){
   setBuffer(gl, sphereTriangleStrip);
   setUniform('Matrix4fv', 'uObjectMat', false, m.matrixValues[m.stackPointer]);
