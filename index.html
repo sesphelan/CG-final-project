@@ -57,8 +57,20 @@ Final Project: Pixar Intro Recreation
 
 <script id='my_instructions' type='text/html'><font color=#b0b0b0>
 <p style="font-size: 18px">
-  Description<br><br>
-  TODO : Add Description of each member's contributions
+  Description:<br><br>
+  In this scene, we've recreated the signature Pixar intro and made<br>
+  it our own with the help of Perlin noise and the other tools we've<br>
+  learned during the course of this class. Some of these include<br>
+  splines to create the cone-shape head of the lamp, as well as hierarchical<br>
+  animation to render the lamp and generate its movement. We textured<br>
+  everything using Perlin noise.<br><br>
+
+  We wanted to explore the cinematic side of computer graphics with this<br>
+  project, creating a character for which the audience can relate to.<br><br>
+
+  Group Member Descriptions:<br><br>
+  Sam Phelan - Rendered body, base, and light bulb of the lamp.<br>
+  Generated initial movement of the lamp in the x and y directions.<br><br>
 </script>
 
 
@@ -461,42 +473,52 @@ let phase2 = 0;
 
 function drawLamp(elapsed){
 
-  const speed = .5;
-  const speed2 = .05;
-  phase += PI * speed * elapsed;
-  phase2 += PI * speed2 * elapsed;
-  if(phase2 >= 1.5){
-    phase2 = -1.5;
+  let speed = .8;
+  const speed2 = .1;
+
+  let depth = -1.5; // amount in z-direction
+
+  phase2 += PI * speed2 * elapsed; // SPEED IN X-DIRECTION
+  /*if(phase2 >= 2){
+    phase2 = -2;
+  }*/
+  let rate = Math.abs(.1*Math.sin(phase));
+  if(phase2 >= .6){ // STOMP ON THE I
+    rate = Math.abs(1.3*Math.sin(phase));
+    phase2 -= PI * speed2 * elapsed;
+    speed = .7;
   }
-  const rate = Math.abs(.1*Math.sin(phase));
+  phase += PI * speed * elapsed; // SPEED IN Y-DIRECTION
+
+  // CREATE LAMP
 
   m.save();
    m.scale(.5, .1, .5);
-   m.translate(phase2, -.7 + rate, 0);
+   m.translate(phase2, -.7 + rate, depth);
 
    mSphere(.41, .41, .41);
   m.restore();
   m.save();
    m.scale(.075, .075, .075);
-   m.translate(phase2, -.7+2*0.075 + rate, 0);
+   m.translate(phase2, -.7+2*0.075 + rate, depth);
    mSphere(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(0.05, 0.05, 0.05);
     m.rotateX(PI/2);
-    m.translate(phase2, rate + (2*0.075)+2*0.05-.7, 0);
+    m.translate(phase2, rate + (2*0.075)+2*0.05-.7, depth);
     mCylinder(.41, .41, .41);
   m.restore();
   m.save();
    m.scale(.075, .075, .075);
-   m.translate(phase2, rate+ (2*0.075)+4*0.05-.7, 0);
+   m.translate(phase2, rate+ (2*0.075)+4*0.05-.7, depth);
    mSphere(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(0.05, 0.05, 0.1);
     m.rotateX(PI/2);
     m.rotateZ(PI/4);
-    m.translate(2*-.05 + phase2, -.25 + rate, 0);
+    m.translate(2*-.05 + phase2, -.25 + rate, depth);
     mCylinder(.41, .41, .41);
     m.translate(0.2, 0.1, 0);
     mCylinder(.41, .41, .41);
@@ -505,14 +527,14 @@ function drawLamp(elapsed){
     m.scale(0.05, 0.05, 0.1);
     m.rotateX(PI/2);
     m.rotateZ(-PI/4);
-    m.translate(2*0.05 + phase2, -.25 + rate, 0);
+    m.translate(2*0.05 + phase2, -.25 + rate, depth);
     mCylinder(.41, .41, .41);
     m.translate(-3*0.05, 3*0.05, 0);
     mCylinder(.41, .41, .41);
   m.restore();
   m.save();
    m.scale(.065, .065, .065);
-   m.translate(-0.15 + phase2, rate-.2, 0);
+   m.translate(-0.15 + phase2, rate-.2, depth);
    mSphere(.41, .41, .41);
    m.translate(0.3, 0, 0);
    mSphere(.41, .41, .41);
@@ -523,73 +545,73 @@ function drawLamp(elapsed){
     m.scale(0.04, 0.1, 0.1);
      m.rotateX(PI/2);
     m.rotateZ(PI/4);
-    m.translate(-2*.12 + phase2, rate+0.09 - .2, 0);
+    m.translate(-2*.12 + phase2, rate+0.09 - .2, depth);
     mCylinder(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(.05, .05, .05);
-    m.translate(-2*.12 - .1 + phase2, rate + 0.2 - .2, 0);
+    m.translate(-2*.12 - .1 + phase2, rate + 0.2 - .2, depth);
     mSphere(.41, .41, .41);
   m.restore();
   m.save();
      m.scale(0.04, 0.1, 0.2);
      m.rotateX(PI/2);
     m.rotateZ(-PI/4 + .2);
-    m.translate(-2*.12 + 0.01 + phase2, rate + 0.37 - .2, 0);
+    m.translate(-2*.12 + 0.01 + phase2, rate + 0.37 - .2, depth);
     mCylinder(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(.05, .05, .05);
-    m.translate(-.11 + phase2, rate + 0.55 - .2, 0);
+    m.translate(-.11 + phase2, rate + 0.55 - .2, depth);
     mSphere(.41, .41, .41);
   m.restore();
   m.save();
      m.scale(0.04, 0.1, 0.2);
      m.rotateX(PI/2);
     m.rotateZ(-PI/4 + .2);
-    m.translate(0.1 + phase2, rate + 0.32 - .2, 0);
+    m.translate(0.1 + phase2, rate + 0.32 - .2, depth);
     mCylinder(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(.05, .05, .05);
-    m.translate(.21 + phase2, rate + .3, 0);
+    m.translate(.21 + phase2, rate + .3, depth);
     mSphere(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(0.04, 0.1, 0.12);
      m.rotateX(PI/2);
     m.rotateZ(-PI/4 + .2);
-    m.translate(-0.035 + phase2, rate + 0.68 - .2, 0);
+    m.translate(-0.035 + phase2, rate + 0.68 - .2, depth);
     mCylinder(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(0.04, 0.1, 0.15);
     m.rotateX(PI/2);
     m.rotateZ(PI/7);
-    m.translate(0.17 + phase2, rate + 0.4, 0);
+    m.translate(0.17 + phase2, rate + 0.4, depth);
     mCylinder(.41, .41, .41);
   m.restore();
   m.save();
     m.scale(.065, .065, .065 );
-    m.translate(0.07 + phase2, rate + 0.6, 0);
+    m.translate(0.07 + phase2, rate + 0.6, depth);
     mSphere(.41, .41, .41);
   m.restore();
   m.save();
   m.scale(0.04, 0.1, 0.07);
      m.rotateX(PI/2);
     m.rotateZ(-PI/3 + .3 + .1*Math.cos(phase));
-    m.translate(.13 + phase2, rate + 0.87 - .2, -0.05);
+    m.translate(.13 + phase2, rate + 0.87 - .2, -0.05 + depth);
     mCylinder(.41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.25, .25, .25);
-    m.translate(.33 + phase2, rate+0.8, 0);
+    m.translate(.33 + phase2, rate+0.8, depth);
     mSphere(100, 100, 100);
   m.restore();
   m.save();
     m.scale(.27, .27, .27);
-    m.translate(.345 + phase2, rate+0.82, -.1);
+    m.translate(.345 + phase2, rate+0.82, -.1 + depth);
     mSphere(100, 100, 100);
   m.restore();
    
