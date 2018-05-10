@@ -41,8 +41,8 @@ void main() {
    float c = 0.1 + 0.9 * max(0.,
              dot(normal, lDir));
    //To get rid of perlin noise textures comment out the line below
-   c *= noise(cos( uTime) *5. * vPos);
-   vec3 color = uRGB * c;
+   c = c*.9 + .1*(c * noise(cos( uTime) *5. * vPos));
+  vec3 color = uRGB * c;
    gl_FragColor = vec4(sqrt(color), 1.0);
 }
 </script>
@@ -71,6 +71,8 @@ Final Project: Pixar Intro Recreation
   Group Member Descriptions:<br><br>
   Sam Phelan - Rendered body, base, and light bulb of the lamp.<br>
   Generated initial movement of the lamp in the x and y directions.<br><br>
+  Joaquin Kunkel - Created the parametric cone shape of the lamp head with a Bezier spline;
+  placed it on the lamp and animated its rotating motion.
 </script>
 
 
@@ -118,6 +120,40 @@ let time = (Date.now() - startTime) / 1000;
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
+
+let bezierMatrix = [ -1,  3, -3, 1,
+                      3, -6,  3, 0,
+                     -3,  3,  0, 0,
+                      1,  0,  0, 0,
+                    ];
+
+let hermiteMatrix = [  2, -2,  1,   1,
+                      -3,  3, -2, -1,
+                       0,  0,  1,  0,
+                       1,  0,  0,  0,
+                     ];
+
+let bsplineMatrix = [  -1/6,  3/6,  -3/6, 1/6,
+                        3/6, -6/6,   3/6,   0,
+                       -3/6,    0,   3/6,   0,
+                        1/6,  4/6,   1/6,   0,
+                     ];
+
+
+// Return a vertex of the lamp head given u & v
+
+function lampHeadVertex(u, v){
+  let th = 2 * Math.PI * u;
+  let spline_array = lampHeadSplineValue(v);
+  let r = spline_array[0];
+  let slope = spline_array[1];
+  let m = -1 / (slope);
+  let x = Math.cos(th) * r;
+  let y = Math.sin(th) * r;
+  let z = v;
+  return [x, y, z, x, y, z, u, v];
+}
+
 
 // Return a vertex of the sphere given u & v
 
@@ -217,7 +253,7 @@ function cubeVertex(u, v){
   else if(u === 1.0){
     a = a.concat([1, 1, 0, 1, 0, 0, u, v]);
   }
-  
+
   if(v === 0.0){ //use v parameter to change z and nz values
     a[0] = 0;
     a[1] = 0;
@@ -254,7 +290,7 @@ function cubeVertex(u, v){
     a[4] = 0;
     a[5] = 1;
   }
-  
+
   return a;
 }
 
@@ -303,6 +339,7 @@ function createParametricPatch(
 var sphereTriangleStrip = createParametricShape(sVertex, 30, 30);
 var cylinderTriangleStrip = createParametricShape(cylinderVertex, 50, 5);
 var cubeTriangleStrip = createParametricShape(cubeVertex, 8, 5);
+var lampHeadTriangleStrip = createParametricShape(lampHeadVertex, 30, 30);
 
 // Multiply 4 by 4 matrices a and b (courtesy of https://evanw.github.io/lightgl.js/docs/matrix.html#section-5)
 function matrixMultiply(a, b) {
@@ -435,7 +472,7 @@ var m = {
     this.matrixValues[this.stackPointer] = mat2;
   },
 };
-   
+
 // DRAWS CUBE
 
 function mCube ( r, g, b){
@@ -446,7 +483,7 @@ function mCube ( r, g, b){
   setUniform('3fv', 'uRGB', [r,g,b]);
   drawBuffer(gl);
 };
-   
+
 // DRAWS SPHERE
 function mSphere(r, g, b){
   setBuffer(gl, sphereTriangleStrip);
@@ -468,6 +505,15 @@ function mCylinder(r, g, b){
   drawBuffer(gl);
 }
 
+function mLampHead(r, g, b){
+  setBuffer(gl, lampHeadTriangleStrip);
+  setUniform('Matrix4fv', 'uObjectMat', false, m.matrixValues[m.stackPointer]);
+  let norMat = matrixInvert(m.matrixValues[m.stackPointer]);
+  setUniform('Matrix4fv', 'uNormalMat', false, norMat);
+  setUniform('3fv', 'uRGB', [r,g,b]);
+  drawBuffer(gl);
+}
+
 let phase = 0;
 let phase2 = 0;
 
@@ -476,8 +522,8 @@ function drawLamp(elapsed){
   let speed = .8;
   const speed2 = .1;
 
-  let depth = -1.5; // amount in z-direction
-
+  let depth = -5; // amount in z-direction
+  let stomping = 0;
   phase2 += PI * speed2 * elapsed; // SPEED IN X-DIRECTION
   /*if(phase2 >= 2){
     phase2 = -2;
@@ -486,7 +532,8 @@ function drawLamp(elapsed){
   if(phase2 >= .6){ // STOMP ON THE I
     rate = Math.abs(1.3*Math.sin(phase));
     phase2 -= PI * speed2 * elapsed;
-    speed = .7;
+    speed = .3;
+    stomping = 1;
   }
   phase += PI * speed * elapsed; // SPEED IN Y-DIRECTION
 
@@ -605,97 +652,108 @@ function drawLamp(elapsed){
   m.restore();
 
   m.save();
-    m.scale(.25, .25, .25);
+    m.scale(.2, .2, .2);
+    if(stomping) m.translate(0, -Math.sin(time2*PI*2.0001 - 1.5)/6, 0);
     m.translate(.33 + phase2, rate+0.8, depth);
     mSphere(100, 100, 100);
   m.restore();
+
+  // LAMP HEAD / CONE
+  m.save();
+    m.scale(0.7, 0.7, 0.7);
+    if(stomping) m.rotateX(Math.sin(time2*PI*2.0001 - 1.5)/3);
+    m.rotateY(Math.PI/5);
+    m.translate(.2 + phase2, rate+0.8, depth - .2);
+    mLampHead(1, 1, 1);
+  m.restore();
+
   m.save();
     m.scale(.27, .27, .27);
     m.translate(.345 + phase2, rate+0.82, -.1 + depth);
-    mSphere(100, 100, 100);
+    //mSphere(100, 100, 100);
   m.restore();
-   
+
    // LETTERS
 
  //P
-
+  let letterdepth = -5;
   m.save();
     m.scale(.08, .55, .1);
-    m.translate(-1.8,0, -2.999);
+    m.translate(-1.8,0, letterdepth);
     mCube( .41 , .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( -1.62, .48, -3);
+    m.translate( -1.62, .48, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m. save();
     m.scale (.06, .25, .1);
-    m.translate( -1.42, .3, -2.999);
+    m.translate( -1.42, .3, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( -1.62, .1212, -3);
+    m.translate( -1.62, .1212, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
 //E
   m.save();
     m.scale(.08, .55, .1);
-    m.translate(-1.15, 0, -2.999);
+    m.translate(-1.15, 0, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( -1.0, .48, -3);
+    m.translate( -1.0, .48, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( -1.0, 0, -3);
+    m.translate( -1.0, 0, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( -1.0, -.48, -3);
+    m.translate( -1.0, -.48, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
 //R
   m.save();
     m.scale(.08, .55, .1);
-    m.translate( -.58, 0, -2.999);
+    m.translate( -.58, 0, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( -.43, .48, -3);
+    m.translate( -.43, .48, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m. save();
     m.scale (.06, .25, .1);
-    m.translate( -.23, .3, -2.999);
+    m.translate( -.23, .3, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( -.43, .1212, -3);
+    m.translate( -.43, .1212, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.08, .35, .1);
-    m.translate( -.45, -.015, -2.999);
+    m.translate( -.45, -.015, letterdepth);
     m.rotateZ( Math.PI /7);
     mCube( .41, .41, .41);
   m.restore();
@@ -703,52 +761,52 @@ function drawLamp(elapsed){
 //L
   m.save();
     m.scale(.08, .55, .1);
-    m.translate( 0, 0, -2.999);
+    m.translate( 0, 0, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.22, .07, .1);
-    m.translate( .2, -.48, -3);
+    m.translate( .2, -.48, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
 //I
   m.save();
     m.scale(.08, .55, .1);
-    m.translate( .8, 0, -2.999);
+    m.translate( .8, 0, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.28, .07, .1);
-    m.translate( .8, .48, -3);
+    m.translate( .8, .48, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.28, .07, .1);
-    m.translate( .8, -.48, -3);
+    m.translate( .8, -.48, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
 //N
   m.save();
     m.scale(.08, .55, .1);
-    m.translate( 1.3, 0, -2.999);
+    m.translate( 1.3, 0, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.076, .57, .1);
-    m.translate( 1.4, -.68, -2.999);
+    m.translate( 1.4, -.68, letterdepth);
     m.rotateZ( Math.PI / 7);
     mCube( .41, .41, .41);
   m.restore();
 
   m.save();
     m.scale(.08, .55, .1);
-    m.translate( 1.82, 0, -2.999);
+    m.translate( 1.82, 0, letterdepth);
     mCube( .41, .41, .41);
   m.restore();
 
@@ -769,6 +827,27 @@ function splineCoordinate(p1, p2, p3, p4, t, sm){ // Takes the 4 arguments given
   let d = resultMat[3];
 
   return a * Math.pow(t, 3) + b * Math.pow(t, 2) + c * t + d;
+}
+
+function lampHeadSplineValue(t){ // Matrix of points and a t
+
+  let resultMat = [];
+  let p1 = 0.3;
+  let p2 = 0.3;
+  let p3 = 0.7;
+  let p4 = 0.55;
+  let sm = bezierMatrix;
+
+  for(var i = 0; i < 4; i++){
+    resultMat[i] = p1*sm[4*i] + p2*sm[4*i+1] + p3*sm[4*i+2] + p4*sm[4*i+3];
+  } // Generates a row vector storing a, b, c, and d.
+
+  let a = resultMat[0];
+  let b = resultMat[1];
+  let c = resultMat[2];
+  let d = resultMat[3];
+
+  return [(a * Math.pow(t, 3) + b * Math.pow(t, 2) + c * t + d), (3 * a * Math.pow(t, 2) + 2 * b * t + c)]; // Returns the value and its derivative.
 }
 
 /* Return the X, Y, or Z coordinate of a vertex on a patch */
@@ -807,23 +886,6 @@ function patchCoordinate(
 
 }
 
-let bezierMatrix = [ -1,  3, -3, 1,
-                      3, -6,  3, 0,
-                     -3,  3,  0, 0,
-                      1,  0,  0, 0,
-                    ];
-
-let hermiteMatrix = [  2, -2,  1,   1,
-                      -3,  3, -2, -1,
-                       0,  0,  1,  0,
-                       1,  0,  0,  0,
-                     ];
-
-let bsplineMatrix = [  -1/6,  3/6,  -3/6, 1/6,
-                        3/6, -6/6,   3/6,   0,
-                       -3/6,    0,   3/6,   0,
-                        1/6,  4/6,   1/6,   0,
-                     ];
 
 function patchVertex(u, v, guidePoints){
   let xGuide = [];
@@ -848,7 +910,10 @@ function patchVertex(u, v, guidePoints){
   return [x, y, z, x, y, z, u, v];
 }
 
+let time2 = 0;
 function animate(gl) {
+
+  time2 = (Date.now() - startTime) / 1000;
 
   setUniform('Matrix4fv', 'uPPMat', false, [
     1, 0, 0, 0,
@@ -856,7 +921,6 @@ function animate(gl) {
     0, 0, -1/zRange, -1/fl,
     0, 0, 0, 1,
   ]);
-
   drawLamp(.1);
 }
 
