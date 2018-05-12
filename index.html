@@ -469,36 +469,33 @@ function mCylinder(r, g, b){
 }
 
 let phase = 0;
-let phase2 = 0;
+let phase2 = -1;
 
 function drawLamp(elapsed){
 
-  let speed = .8;
-  const speed2 = .1;
+  let speed = .8; // Y DIRECTION SPEED
+  const speed2 = .1; // X DIRECTION SPEED
 
-  let depth = -1.5; // amount in z-direction
+  let depth = -2.5; // CHANGE VALUE TO PUSH LAMP BACKWARDS/FORWARDS
 
-  phase2 += PI * speed2 * elapsed; // SPEED IN X-DIRECTION
-  /*if(phase2 >= 2){
-    phase2 = -2;
-  }*/
-  let rate = Math.abs(.1*Math.sin(phase));
-  if(phase2 >= .6){ // STOMP ON THE I
-    rate = Math.abs(1.3*Math.sin(phase));
+  phase2 += PI * speed2 * elapsed; // movement IN X-DIRECTION
+
+  let rate = Math.abs(.2*Math.sin(phase));
+  if(phase2 >= .75){ // STOMP ON THE I
+    rate = Math.abs(1.7*Math.sin(phase));
     phase2 -= PI * speed2 * elapsed;
     speed = .7;
   }
-  phase += PI * speed * elapsed; // SPEED IN Y-DIRECTION
+  phase += PI * speed * elapsed; // movement IN Y-DIRECTION
 
   // CREATE LAMP
 
-  m.save();
+  m.save(); // BASE OF LAMP
    m.scale(.5, .1, .5);
    m.translate(phase2, -.7 + rate, depth);
-
    mSphere(.41, .41, .41);
   m.restore();
-  m.save();
+  m.save(); // VARIOUS JOINTS, ARMS REPRESENTED THROUGH CYLINDERS, SPHERES
    m.scale(.075, .075, .075);
    m.translate(phase2, -.7+2*0.075 + rate, depth);
    mSphere(.41, .41, .41);
@@ -604,7 +601,7 @@ function drawLamp(elapsed){
     mCylinder(.41, .41, .41);
   m.restore();
 
-  m.save();
+  m.save(); // LIGHT BULB
     m.scale(.25, .25, .25);
     m.translate(.33 + phase2, rate+0.8, depth);
     mSphere(100, 100, 100);
